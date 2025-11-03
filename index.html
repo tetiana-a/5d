@@ -708,9 +708,94 @@
             audioElement = new Audio();
             audioElement.crossOrigin = 'anonymous';
             // Використовуємо локальний аудіофайл
-            audioElement.src = "639528432hz-attract-love-deep-feeling-300658.mp3";
+            audioElement.src = "./639528432hz-attract-love-deep-feeling-300658.mp3";
             audioElement.loop = true;
             audioElement.volume = 0.7;
+            let audioElement;
+let audioContext;
+let panner;
+let isAudioPlaying = false;
+
+function initAudio() {
+  audioElement = new Audio();
+  audioElement.crossOrigin = 'anonymous';
+  audioElement.src = "./639528432hz-attract-love-deep-feeling-300658.mp3";
+  audioElement.loop = true;
+  audioElement.volume = 0.7;
+
+  // корисно для мобільних
+  audioElement.setAttribute('playsinline', '');
+  audioElement.setAttribute('preload', 'auto');
+
+  // лог помилок завантаження
+  audioElement.onerror = () => {
+    console.warn('Audio load error', audioElement.error);
+  };
+
+  const audioToggle = document.getElementById('audio-toggle');
+  audioToggle.addEventListener('click', toggleAudio);
+
+  const volumeSlider = document.getElementById('volume-slider');
+  volumeSlider.addEventListener('input', (e) => {
+    audioElement.volume = e.target.value / 100;
+  });
+}
+
+async function ensureAudioGraph() {
+  if (!audioContext) {
+    audioContext = new (window.AudioContext || window.webkitAudioContext)();
+
+    const source = audioContext.createMediaElementSource(audioElement);
+    panner = audioContext.createPanner();
+    panner.panningModel = 'HRTF';
+    panner.distanceModel = 'inverse';
+    panner.refDistance = 1;
+    panner.maxDistance = 10000;
+    panner.rolloffFactor = 1;
+    panner.coneInnerAngle = 360;
+    panner.coneOuterAngle = 0;
+    panner.coneOuterGain = 0;
+
+    if (panner.positionX) {
+      panner.positionX.value = 0;
+      panner.positionY.value = 2;
+      panner.positionZ.value = 0;
+    } else if (panner.setPosition) {
+      panner.setPosition(0, 2, 0);
+    }
+
+    source.connect(panner);
+    panner.connect(audioContext.destination);
+  }
+  if (audioContext.state === 'suspended') {
+    await audioContext.resume();
+  }
+}
+
+async function toggleAudio() {
+  const audioToggle = document.getElementById('audio-toggle');
+
+  // легка вібрація
+  if (navigator.vibrate) navigator.vibrate(30);
+
+  try {
+    await ensureAudioGraph();
+    if (!isAudioPlaying) {
+      await audioElement.play();
+      isAudioPlaying = true;
+      audioToggle.setAttribute('aria-pressed', 'true');
+      audioToggle.textContent = 'Pause 528Hz';
+    } else {
+      audioElement.pause();
+      isAudioPlaying = false;
+      audioToggle.setAttribute('aria-pressed', 'false');
+      audioToggle.textContent = 'Play 528Hz';
+    }
+  } catch (e) {
+    console.warn('Playback blocked or failed:', e);
+  }
+}
+
             
             // Web Audio API for spatial sound
             try {
@@ -930,3 +1015,4 @@
 </body>
 
 </html>
+
