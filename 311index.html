@@ -1,0 +1,931 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>5D Meditation – Enter the Portal</title>
+    <meta name="description" content="Browser-based 5D game-meditation: 3D scene, 528Hz spatial sound, light haptics, portal effect.">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            color-scheme: dark;
+            --bg: #080a0f;
+            --panel: #0b0e15;
+            --text: #e7ecff;
+            --muted: rgba(231, 236, 255, 0.7);
+            --line: rgba(255, 255, 255, 0.08);
+            --accent1: #66e0ff;
+            --accent2: #b6a6ff;
+            --accent3: #ff6ec7;
+            --accent4: #6eff9c;
+            --gradient: linear-gradient(135deg, #66e0ff, #b6a6ff);
+        }
+
+        * { box-sizing: border-box; }
+        html, body { height: 100%; margin: 0; }
+        body {
+            font-family: 'Inter', system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            overflow-x: hidden;
+            position: relative;
+        }
+
+        /* Глобальні стилі */
+        .page { min-height: 100dvh; display: flex; flex-direction: column; }
+        
+        /* Навігація */
+        .nav {
+            position: sticky; top: 0; z-index: 100;
+            display: flex; align-items: center; justify-content: space-between;
+            padding: 12px 18px; border-bottom: 1px solid var(--line);
+            backdrop-filter: blur(20px); background: rgba(8,10,15,0.8);
+            box-shadow: 0 4px 30px rgba(0,0,0,0.3);
+        }
+        .brand { display: flex; align-items: center; gap: 8px; letter-spacing: .15em; font-weight: 600; font-size: 14px; }
+        .dot { 
+            width: 10px; height: 10px; 
+            background: var(--accent1); 
+            border-radius: 999px; 
+            box-shadow: 0 0 18px var(--accent1), 0 0 30px var(--accent2);
+            animation: pulse 2s infinite;
+        }
+        @keyframes pulse {
+            0% { transform: scale(1); opacity: 1; }
+            50% { transform: scale(1.2); opacity: 0.8; }
+            100% { transform: scale(1); opacity: 1; }
+        }
+        .links { display: none; gap: 18px; opacity: .85; }
+        .links a { color: var(--text); text-decoration: none; transition: all 0.3s; }
+        .links a:hover { color: var(--accent1); }
+        @media (min-width: 768px){ .links{ display: flex; } .brand{ font-size: 15px; } }
+
+        /* Кнопки */
+        .btn {
+            display:inline-flex; align-items:center; gap:8px;
+            padding: 10px 14px; border-radius: 12px; border:1px solid var(--line);
+            text-decoration:none; color:var(--text); background: rgba(255,255,255,.06);
+            cursor: pointer; transition: all 0.3s;
+            position: relative; overflow: hidden;
+        }
+        .btn::before {
+            content: ''; position: absolute; top: 0; left: -100%;
+            width: 100%; height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+            transition: left 0.5s;
+        }
+        .btn:hover::before { left: 100%; }
+        .btn:hover { background: rgba(255,255,255,.1); transform: translateY(-2px); }
+        .btn.primary { 
+            background: var(--gradient); 
+            color: #001016; border-color: transparent; 
+            font-weight: 700; box-shadow: 0 4px 15px rgba(102, 224, 255, 0.3);
+        }
+        .btn.primary:hover { 
+            filter: brightness(1.1); 
+            box-shadow: 0 6px 20px rgba(102, 224, 255, 0.4);
+        }
+        .btn.ghost { background: transparent; }
+
+        /* Герой секція */
+        .hero {
+            display:grid; gap:22px; padding: 24px 18px 12px; align-items:center;
+            position: relative;
+        }
+        @media (min-width: 960px){
+            .hero { grid-template-columns: 1.1fr 1fr; max-width: 1160px; margin: 0 auto; }
+        }
+        .hero-text h1 { 
+            font-size: 32px; line-height: 1.15; margin: 0; font-weight: 800;
+            background: var(--gradient);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        @media (min-width: 768px){ .hero-text h1{ font-size: 48px; } }
+        .hero-text p { margin: 14px 0 0; color: var(--muted); max-width: 56ch; }
+        .cta { display:flex; gap: 10px; margin-top: 18px; flex-wrap: wrap; }
+        .hint { color: #aab6ff88; font-size: 12px; margin-top: 8px; }
+        .accent1 { color: var(--accent1); } 
+        .accent2 { color: var(--accent2); }
+        .accent3 { color: var(--accent3); }
+        .accent4 { color: var(--accent4); }
+
+        .hero-canvas, .buy-canvas {
+            border:1px solid var(--line); border-radius: 16px; overflow:hidden;
+            box-shadow: 0 0 80px -20px rgba(0,200,255,.35),
+                        0 0 120px -10px rgba(182, 166, 255, 0.2);
+            min-height: 320px;
+            position: relative;
+        }
+
+        /* Функції */
+        .features {
+            display:grid; gap:14px; padding: 20px 18px; border-top:1px solid var(--line);
+            background: rgba(255,255,255,.03);
+        }
+        @media (min-width: 960px){
+            .features { grid-template-columns: repeat(3, 1fr); max-width: 1160px; margin: 0 auto; }
+        }
+        .feature { 
+            background: var(--panel); border:1px solid var(--line); border-radius: 16px; padding: 18px;
+            transition: all 0.3s;
+            position: relative; overflow: hidden;
+        }
+        .feature::before {
+            content: ''; position: absolute; top: 0; left: 0;
+            width: 100%; height: 3px;
+            background: var(--gradient);
+        }
+        .feature:hover { transform: translateY(-5px); box-shadow: 0 10px 30px rgba(0,0,0,0.2); }
+        .ft-title { color: var(--accent1); font-weight: 600; font-size: 14px; }
+        .ft-desc { color: var(--text); opacity: .8; margin-top: 6px; font-size: 14px; }
+
+        /* Секція покупки */
+        .buy {
+            display:grid; gap:22px; padding: 28px 18px; align-items:center;
+        }
+        @media (min-width: 960px){
+            .buy { grid-template-columns: 1fr 1fr; max-width: 1160px; margin: 0 auto; }
+        }
+        .card { 
+            background: var(--panel); border:1px solid var(--line); border-radius: 18px; padding: 22px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+            position: relative; overflow: hidden;
+        }
+        .card::before {
+            content: ''; position: absolute; top: 0; right: 0;
+            width: 150px; height: 150px;
+            background: radial-gradient(circle, var(--accent3) 0%, transparent 70%);
+            opacity: 0.1;
+        }
+        .card h2 { margin: 0; font-size: 24px; }
+        .card ul { margin: 12px 0 0 0; padding-left: 18px; opacity:.9; }
+        .price-row { display:flex; gap:18px; align-items:flex-end; margin-top: 18px; }
+        .price { font-size: 34px; font-weight: 900; }
+        .small-muted { color: var(--muted); font-size: 12px; }
+
+        /* Футер */
+        .footer {
+            border-top: 1px solid var(--line);
+            display:flex; gap:10px; justify-content:space-between; align-items:center;
+            padding: 18px; color: var(--muted);
+            max-width: 1160px; margin: 0 auto 14px;
+        }
+        .footer .links { display:flex; gap: 14px; }
+        .footer .links a { color: var(--muted); text-decoration: none; }
+        .footer .links a:hover { color: var(--text); }
+        
+        /* Контейнер для canvas */
+        #canvas-container, #canvas-container-2 {
+            width: 100%;
+            height: 100%;
+            position: absolute;
+            top: 0;
+            left: 0;
+        }
+
+        /* Плаваючі частинки */
+        .particles {
+            position: absolute; top: 0; left: 0;
+            width: 100%; height: 100%;
+            pointer-events: none;
+            overflow: hidden;
+            z-index: 1;
+        }
+        .particle {
+            position: absolute;
+            background: var(--accent1);
+            border-radius: 50%;
+            pointer-events: none;
+            opacity: 0.4;
+            animation: float 15s infinite linear;
+        }
+        @keyframes float {
+            0% { transform: translateY(100vh) translateX(0); opacity: 0; }
+            10% { opacity: 0.4; }
+            90% { opacity: 0.4; }
+            100% { transform: translateY(-100vh) translateX(100px); opacity: 0; }
+        }
+
+        /* VR режим */
+        .vr-mode {
+            position: fixed; top: 0; left: 0;
+            width: 100%; height: 100%;
+            background: #000; z-index: 1000;
+            display: none;
+        }
+        .vr-mode.active { display: block; }
+        .vr-exit {
+            position: absolute; top: 20px; right: 20px;
+            z-index: 1001; padding: 10px 20px;
+            background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2);
+            border-radius: 8px; color: white; cursor: pointer;
+        }
+
+        /* Звуковий контролер */
+        .audio-controls {
+            position: fixed; bottom: 20px; right: 20px;
+            z-index: 100; display: flex; flex-direction: column; gap: 10px;
+            align-items: flex-end;
+        }
+        .volume-slider {
+            width: 120px; height: 6px;
+            -webkit-appearance: none; appearance: none;
+            background: rgba(255,255,255,0.1); border-radius: 3px;
+            outline: none;
+        }
+        .volume-slider::-webkit-slider-thumb {
+            -webkit-appearance: none; appearance: none;
+            width: 16px; height: 16px; border-radius: 50%;
+            background: var(--accent1); cursor: pointer;
+        }
+
+        /* Ефект затемнення */
+        .dim-overlay {
+            position: fixed; top: 0; left: 0;
+            width: 100%; height: 100%;
+            background: rgba(0,0,0,0.7); z-index: 50;
+            pointer-events: none; opacity: 0;
+            transition: opacity 1s;
+        }
+        .dim-overlay.active { opacity: 1; }
+
+        /* Індикатор завантаження */
+        .loading-indicator {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 50px;
+            height: 50px;
+            border: 3px solid rgba(102, 224, 255, 0.3);
+            border-radius: 50%;
+            border-top-color: var(--accent1);
+            animation: spin 1s ease-in-out infinite;
+            z-index: 10;
+        }
+        @keyframes spin {
+            to { transform: translate(-50%, -50%) rotate(360deg); }
+        }
+
+        /* Адаптивність */
+        @media (max-width: 768px) {
+            .hero { padding: 16px 12px; }
+            .hero-text h1 { font-size: 28px; }
+            .cta { flex-direction: column; }
+            .btn { width: 100%; justify-content: center; }
+            .features { grid-template-columns: 1fr; }
+            .buy { grid-template-columns: 1fr; }
+            .audio-controls { bottom: 10px; right: 10px; }
+        }
+
+        /* Анімація появи */
+        .fade-in {
+            opacity: 0; transform: translateY(20px);
+            animation: fadeIn 0.8s forwards;
+        }
+        @keyframes fadeIn {
+            to { opacity: 1; transform: translateY(0); }
+        }
+    </style>
+</head>
+<body>
+    <div class="particles" id="particles"></div>
+    <div class="dim-overlay" id="dim-overlay"></div>
+    
+    <div class="page">
+        <header class="nav">
+            <div class="brand">
+                <span class="dot"></span>
+                <span>5D MEDITATION</span>
+            </div>
+            <nav class="links">
+                <a href="#demo">Demo</a>
+                <a href="#features">Features</a>
+                <a href="#buy">Unlock</a>
+            </nav>
+            <button class="btn ghost" id="audio-toggle" aria-pressed="false">Play 528Hz</button>
+        </header>
+
+        <section class="hero">
+            <div class="hero-text fade-in">
+                <h1>
+                    <span>Enter the</span> <span class="accent1">portal</span> <span>of silence.</span>
+                    <br />
+                    <span>Feel the</span> <span class="accent2">power</span> <span>within.</span>
+                </h1>
+                <p>
+                    Browser-based 5D game-meditation: space of light, 528Hz music, light haptics.
+                    3–5 min for a gentle state reset.
+                </p>
+                <div class="cta">
+                    <a class="btn" href="#demo" aria-label="Demonstration">▶ Demo</a>
+                    <a class="btn primary" href="#buy" aria-label="Unlock Full Version">🔓 Unlock Full Version</a>
+                    <button class="btn" id="vr-btn" aria-label="VR Mode">🥽 VR Mode</button>
+                </div>
+                <p class="hint">Tip: wear headphones and reduce screen brightness.</p>
+            </div>
+
+            <div class="hero-canvas" id="demo" aria-label="3D portal demonstration">
+                <div id="canvas-container"></div>
+                <div class="loading-indicator" id="loading-1"></div>
+            </div>
+        </section>
+
+        <section class="features" id="features">
+            <div class="feature fade-in">
+                <div class="ft-title">3D Space</div>
+                <div class="ft-desc">Three.js • light, fog, particles</div>
+            </div>
+            <div class="feature fade-in" style="animation-delay: 0.2s">
+                <div class="ft-title">Spatial Sound</div>
+                <div class="ft-desc">528Hz music (recommended) • binaural</div>
+            </div>
+            <div class="feature fade-in" style="animation-delay: 0.4s">
+                <div class="ft-title">Haptics</div>
+                <div class="ft-desc">light event vibration (mobile/gamepad)</div>
+            </div>
+        </section>
+
+        <section class="buy" id="buy">
+            <div class="card fade-in">
+                <h2>🔓 Full Version</h2>
+                <ul>
+                    <li>3 ritual scenes (water, temple, flight)</li>
+                    <li>2 choice branches + affirmations</li>
+                    <li>12-min 528Hz audio + spatial sound</li>
+                    <li>PWA (offline access)</li>
+                </ul>
+                <div class="price-row">
+                    <div>
+                        <div class="price">$19</div>
+                        <div class="small-muted">one-time</div>
+                    </div>
+                    <a class="btn primary" href="https://buy.stripe.com/test_" target="_blank" rel="noreferrer" aria-label="Buy Now">
+                        Buy Now
+                    </a>
+                </div>
+                <p class="small-muted">
+                    *Can be replaced with PayPal / Telegram Stars / Gumroad.
+                </p>
+            </div>
+
+            <div class="buy-canvas fade-in" style="animation-delay: 0.3s" aria-label="3D full version demonstration">
+                <div id="canvas-container-2"></div>
+                <div class="loading-indicator" id="loading-2"></div>
+            </div>
+        </section>
+
+        <footer class="footer">
+            <div>© 2023 5D Meditation. All rights reserved.</div>
+            <div class="links">
+                <a href="#">Privacy</a>
+                <a href="#">Terms</a>
+            </div>
+        </footer>
+    </div>
+
+    <div class="audio-controls" role="group" aria-label="Sound control">
+        <input type="range" class="volume-slider" id="volume-slider" min="0" max="100" value="70" aria-label="Volume">
+        <span>Volume</span>
+    </div>
+
+    <div class="vr-mode" id="vr-mode" role="dialog" aria-modal="true" aria-label="VR Mode">
+        <button class="vr-exit" id="vr-exit" aria-label="Exit VR Mode">Exit VR</button>
+        <div id="vr-canvas-container"></div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/postprocessing/EffectComposer.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/postprocessing/RenderPass.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/postprocessing/UnrealBloomPass.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/shaders/CopyShader.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/postprocessing/ShaderPass.js"></script>
+    <script>
+        // Глобальні змінні
+        let scenes = [];
+        let isAudioPlaying = false;
+        let audioElement;
+        let audioContext;
+        let panner;
+        let vrMode = false;
+        let vrRenderer, vrScene, vrCamera;
+        
+        // Ініціалізація сцени
+        function initScene(containerId, loadingId) {
+            const container = document.getElementById(containerId);
+            const loadingIndicator = document.getElementById(loadingId);
+            
+            // Створення сцени
+            const scene = new THREE.Scene();
+            scene.fog = new THREE.FogExp2(0x0a0a12, 0.008);
+            
+            // Камера
+            const camera = new THREE.PerspectiveCamera(55, container.clientWidth / container.clientHeight, 0.1, 1000);
+            camera.position.set(6, 4, 8);
+            
+            // Рендерер
+            const renderer = new THREE.WebGLRenderer({ 
+                antialias: true, 
+                alpha: true,
+                powerPreference: "high-performance"
+            });
+            renderer.setSize(container.clientWidth, container.clientHeight);
+            renderer.shadowMap.enabled = true;
+            renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+            renderer.toneMapping = THREE.ACESFilmicToneMapping;
+            renderer.toneMappingExposure = 1.2;
+            container.appendChild(renderer.domElement);
+            
+            // Пост-обробка
+            const composer = new THREE.EffectComposer(renderer);
+            const renderPass = new THREE.RenderPass(scene, camera);
+            composer.addPass(renderPass);
+            
+            const bloomPass = new THREE.UnrealBloomPass(
+                new THREE.Vector2(container.clientWidth, container.clientHeight),
+                1.5,  // intensity
+                0.4,  // radius
+                0.85   // threshold
+            );
+            composer.addPass(bloomPass);
+            
+            // Орбітальні контролі
+            const controls = new THREE.OrbitControls(camera, renderer.domElement);
+            controls.enablePan = false;
+            controls.minDistance = 4;
+            controls.maxDistance = 14;
+            controls.enableDamping = true;
+            controls.dampingFactor = 0.05;
+            
+            // Освітлення
+            const ambientLight = new THREE.AmbientLight(0xffffff, 0.35);
+            scene.add(ambientLight);
+            
+            const directionalLight = new THREE.DirectionalLight(0xc8d7ff, 1);
+            directionalLight.position.set(8, 15, 6);
+            directionalLight.castShadow = true;
+            directionalLight.shadow.mapSize.width = 2048;
+            directionalLight.shadow.mapSize.height = 2048;
+            scene.add(directionalLight);
+            
+            const pointLight1 = new THREE.PointLight(0x6ab3ff, 1.2, 30);
+            pointLight1.position.set(-6, 3, -4);
+            scene.add(pointLight1);
+            
+            const pointLight2 = new THREE.PointLight(0xe6b7ff, 1.2, 30);
+            pointLight2.position.set(6, 3, 4);
+            scene.add(pointLight2);
+            
+            const pointLight3 = new THREE.PointLight(0xff6ec7, 0.8, 20);
+            pointLight3.position.set(0, 10, 0);
+            scene.add(pointLight3);
+            
+            // Небо
+            const skyGeometry = new THREE.SphereGeometry(150, 32, 32);
+            const skyMaterial = new THREE.ShaderMaterial({
+                uniforms: {
+                    topColor: { value: new THREE.Color(0x0a0a12) },
+                    bottomColor: { value: new THREE.Color(0x1a1f2e) },
+                    offset: { value: 33 },
+                    exponent: { value: 0.6 }
+                },
+                vertexShader: `
+                  varying vec3 vWorldPosition;
+                  void main() {
+                    vec4 worldPosition = modelMatrix * vec4(position, 1.0);
+                    vWorldPosition = worldPosition.xyz;
+                    gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+                  }
+                `,
+                fragmentShader: `
+                  uniform vec3 topColor;
+                  uniform vec3 bottomColor;
+                  uniform float offset;
+                  uniform float exponent;
+                  varying vec3 vWorldPosition;
+                  void main() {
+                    float h = normalize(vWorldPosition + offset).y;
+                    gl_FragColor = vec4(mix(bottomColor, topColor, max(pow(max(h, 0.0), exponent), 0.0)), 1.0);
+                  }
+                `,
+                side: THREE.BackSide
+            });
+            const sky = new THREE.Mesh(skyGeometry, skyMaterial);
+            scene.add(sky);
+            
+            // Зірки
+            const starsGeometry = new THREE.BufferGeometry();
+            const starsMaterial = new THREE.PointsMaterial({
+                color: 0xffffff,
+                size: 0.1,
+                transparent: true,
+                blending: THREE.AdditiveBlending,
+                depthWrite: false
+            });
+            
+            const starsVertices = [];
+            for (let i = 0; i < 10000; i++) {
+                const x = (Math.random() - 0.5) * 300;
+                const y = (Math.random() - 0.5) * 300;
+                const z = (Math.random() - 0.5) * 300;
+                starsVertices.push(x, y, z);
+            }
+            
+            starsGeometry.setAttribute('position', new THREE.Float32BufferAttribute(starsVertices, 3));
+            const stars = new THREE.Points(starsGeometry, starsMaterial);
+            scene.add(stars);
+            
+            // Земля
+            const groundGeometry = new THREE.PlaneGeometry(400, 400, 64, 64);
+            const groundMaterial = new THREE.MeshStandardMaterial({
+                color: 0x10131a,
+                roughness: 1,
+                metalness: 0
+            });
+            const ground = new THREE.Mesh(groundGeometry, groundMaterial);
+            ground.rotation.x = -Math.PI / 2;
+            ground.receiveShadow = true;
+            scene.add(ground);
+            
+            // Портальні кільця
+            const portalRings = [];
+            for (let i = 0; i < 6; i++) {
+                const ringGeometry = new THREE.TorusGeometry(2 + i * 0.45, 0.05 + i * 0.012, 32, 200);
+                const ringMaterial = new THREE.MeshStandardMaterial({
+                    emissive: i % 2 === 0 ? 0x9cc2ff : 0xff6ec7,
+                    emissiveIntensity: 0.6 - i * 0.07,
+                    color: 0x1a1f2e,
+                    metalness: 0.3,
+                    roughness: 0.2
+                });
+                const ring = new THREE.Mesh(ringGeometry, ringMaterial);
+                ring.position.y = 2;
+                ring.castShadow = true;
+                ring.receiveShadow = true;
+                portalRings.push(ring);
+                scene.add(ring);
+            }
+            
+            // Кристал
+            const crystalGeometry = new THREE.OctahedronGeometry(0.45, 0);
+            const crystalMaterial = new THREE.MeshStandardMaterial({
+                color: 0xc9d4ff,
+                metalness: 0.8,
+                roughness: 0.1,
+                emissive: 0x8aa5ff,
+                emissiveIntensity: 0.3
+            });
+            const crystal = new THREE.Mesh(crystalGeometry, crystalMaterial);
+            crystal.position.set(0, 2.2, 0);
+            crystal.castShadow = true;
+            scene.add(crystal);
+            
+            // Аура підлоги
+            const auraGeometry = new THREE.RingGeometry(1.2, 4.5, 64);
+            const auraMaterial = new THREE.MeshBasicMaterial({
+                color: 0x7ab8ff,
+                transparent: true,
+                opacity: 0.15,
+                side: THREE.DoubleSide
+            });
+            const floorAura = new THREE.Mesh(auraGeometry, auraMaterial);
+            floorAura.rotation.x = -Math.PI / 2;
+            floorAura.position.set(0, 0.01, 0);
+            scene.add(floorAura);
+            
+            // Текст
+            const textGeometry = new THREE.PlaneGeometry(4, 1);
+            const canvas = document.createElement('canvas');
+            canvas.width = 512;
+            canvas.height = 128;
+            const context = canvas.getContext('2d');
+            context.fillStyle = '#cfe3ff';
+            context.font = 'Bold 60px Arial';
+            context.textAlign = 'center';
+            context.textBaseline = 'middle';
+            context.fillText('ENTER THE PORTAL', 256, 64);
+            
+            const texture = new THREE.CanvasTexture(canvas);
+            const textMaterial = new THREE.MeshBasicMaterial({
+                map: texture,
+                transparent: true,
+                side: THREE.DoubleSide
+            });
+            const textMesh = new THREE.Mesh(textGeometry, textMaterial);
+            textMesh.position.set(0, 5.6, 0);
+            scene.add(textMesh);
+            
+            // Частинки
+            const particlesGeometry = new THREE.BufferGeometry();
+            const particlesMaterial = new THREE.PointsMaterial({
+                color: 0xffffff,
+                size: 0.02,
+                transparent: true,
+                blending: THREE.AdditiveBlending,
+                depthWrite: false
+            });
+            
+            const particlesVertices = [];
+            for (let i = 0; i < 2000; i++) {
+                const x = (Math.random() - 0.5) * 10;
+                const y = Math.random() * 10;
+                const z = (Math.random() - 0.5) * 10;
+                particlesVertices.push(x, y, z);
+            }
+            
+            particlesGeometry.setAttribute('position', new THREE.Float32BufferAttribute(particlesVertices, 3));
+            const particles = new THREE.Points(particlesGeometry, particlesMaterial);
+            scene.add(particles);
+            
+            // Обробка зміни розміру вікна
+            function handleResize() {
+                camera.aspect = container.clientWidth / container.clientHeight;
+                camera.updateProjectionMatrix();
+                renderer.setSize(container.clientWidth, container.clientHeight);
+                composer.setSize(container.clientWidth, container.clientHeight);
+            }
+            window.addEventListener('resize', handleResize);
+            
+            // Функція анімації для цієї сцени
+            function animate() {
+                requestAnimationFrame(animate);
+                
+                const time = Date.now() * 0.001;
+                
+                // Обертання портальних кілець
+                portalRings.forEach((ring, i) => {
+                    ring.rotation.y = time * (0.2 + i * 0.02);
+                    ring.position.y = 2 + Math.sin(time * 0.5 + i) * 0.1;
+                });
+                
+                // Анімація кристала
+                crystal.position.y = 2.2 + Math.sin(time * 1.7) * 0.25;
+                crystal.rotation.y = time * 0.6;
+                crystal.rotation.x = Math.sin(time * 0.8) * 0.2;
+                
+                // Анімація аури підлоги
+                const scale = 1 + Math.sin(time * 1.2) * 0.05;
+                floorAura.scale.set(scale, scale, scale);
+                floorAura.material.opacity = 0.15 + Math.sin(time * 0.7) * 0.05;
+                
+                // Обертання зірок
+                stars.rotation.y = time * 0.05;
+                stars.rotation.x = Math.sin(time * 0.03) * 0.1;
+                
+                controls.update();
+                composer.render();
+            }
+            
+            // Сховати індикатор завантаження
+            loadingIndicator.style.display = 'none';
+            
+            // Зберегти об'єкти сцени
+            scenes.push({
+                scene,
+                camera,
+                renderer,
+                controls,
+                composer,
+                portalRings,
+                crystal,
+                floorAura,
+                stars,
+                container,
+                handleResize
+            });
+            
+            // Запустити анімацію
+            animate();
+        }
+        
+        // Ініціалізація аудіо
+        function initAudio() {
+            audioElement = new Audio();
+            audioElement.crossOrigin = 'anonymous';
+            // Використовуємо локальний аудіофайл
+            audioElement.src = "/639528432hz-attract-love-deep-feeling-300658.mp3";
+            audioElement.loop = true;
+            audioElement.volume = 0.7;
+            
+            // Web Audio API for spatial sound
+            try {
+                audioContext = new (window.AudioContext || window.webkitAudioContext)();
+                const source = audioContext.createMediaElementSource(audioElement);
+                panner = audioContext.createPanner();
+                panner.panningModel = 'HRTF';
+                panner.distanceModel = 'inverse';
+                panner.refDistance = 1;
+                panner.maxDistance = 10000;
+                panner.rolloffFactor = 1;
+                panner.coneInnerAngle = 360;
+                panner.coneOuterAngle = 0;
+                panner.coneOuterGain = 0;
+                
+                if (panner.positionX) {
+                    panner.positionX.value = 0;
+                    panner.positionY.value = 2;
+                    panner.positionZ.value = 0;
+                } else if (panner.setPosition) {
+                    panner.setPosition(0, 2, 0);
+                }
+                
+                source.connect(panner);
+                panner.connect(audioContext.destination);
+            } catch (e) {
+                console.warn("Web Audio API not supported", e);
+            }
+            
+            const audioToggle = document.getElementById('audio-toggle');
+            audioToggle.addEventListener('click', toggleAudio);
+            
+            const volumeSlider = document.getElementById('volume-slider');
+            volumeSlider.addEventListener('input', (e) => {
+                audioElement.volume = e.target.value / 100;
+            });
+        }
+        
+        // Перемкання аудіо
+        function toggleAudio() {
+            const audioToggle = document.getElementById('audio-toggle');
+            
+            if (!isAudioPlaying) {
+                // Light haptics
+                if (navigator.vibrate) {
+                    navigator.vibrate(30);
+                }
+                
+                // Resume audio context
+                if (audioContext && audioContext.state === 'suspended') {
+                    audioContext.resume();
+                }
+                
+                audioElement.play().then(() => {
+                    isAudioPlaying = true;
+                    audioToggle.setAttribute('aria-pressed', 'true');
+                    audioToggle.textContent = 'Pause 528Hz';
+                }).catch(error => {
+                    console.warn('Autoplay blocked – click again:', error);
+                });
+            } else {
+                audioElement.pause();
+                isAudioPlaying = false;
+                audioToggle.setAttribute('aria-pressed', 'false');
+                audioToggle.textContent = 'Play 528Hz';
+            }
+        }
+        
+        // Створення плаваючих частинок
+        function createParticles() {
+            const particlesContainer = document.getElementById('particles');
+            
+            for (let i = 0; i < 30; i++) {
+                const particle = document.createElement('div');
+                particle.className = 'particle';
+                
+                // Random size
+                const size = Math.random() * 5 + 2;
+                particle.style.width = `${size}px`;
+                particle.style.height = `${size}px`;
+                
+                // Random position
+                particle.style.left = `${Math.random() * 100}%`;
+                particle.style.top = `${Math.random() * 100}%`;
+                
+                // Random animation delay
+                particle.style.animationDelay = `${Math.random() * 15}s`;
+                
+                // Random color
+                const colors = ['#66e0ff', '#b6a6ff', '#ff6ec7', '#6eff9c'];
+                particle.style.background = colors[Math.floor(Math.random() * colors.length)];
+                
+                particlesContainer.appendChild(particle);
+            }
+        }
+        
+        // VR режим
+        function initVR() {
+            const vrBtn = document.getElementById('vr-btn');
+            const vrMode = document.getElementById('vr-mode');
+            const vrExit = document.getElementById('vr-exit');
+            
+            vrBtn.addEventListener('click', () => {
+                if (navigator.xr) {
+                    navigator.xr.isSessionSupported('immersive-vr').then((supported) => {
+                        if (supported) {
+                            enterWebXR();
+                        } else {
+                            vrMode.classList.add('active');
+                            initFakeVR();
+                        }
+                    });
+                } else {
+                    // Fake VR mode for demonstration
+                    vrMode.classList.add('active');
+                    initFakeVR();
+                }
+            });
+            
+            vrExit.addEventListener('click', () => {
+                vrMode.classList.remove('active');
+                if (vrRenderer) {
+                    vrRenderer.dispose();
+                    document.getElementById('vr-canvas-container').innerHTML = '';
+                }
+            });
+        }
+        
+        // Фейковий VR режим
+        function initFakeVR() {
+            const container = document.getElementById('vr-canvas-container');
+            
+            // Create VR scene
+            vrScene = new THREE.Scene();
+            vrCamera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+            
+            vrRenderer = new THREE.WebGLRenderer({ antialias: true });
+            vrRenderer.setSize(window.innerWidth, window.innerHeight);
+            container.appendChild(vrRenderer.domElement);
+            
+            // Add objects to VR scene
+            const geometry = new THREE.IcosahedronGeometry(1, 4);
+            const material = new THREE.MeshBasicMaterial({ 
+                color: 0x66e0ff,
+                wireframe: true 
+            });
+            const mesh = new THREE.Mesh(geometry, material);
+            vrScene.add(mesh);
+            
+            const light = new THREE.PointLight(0xffffff, 1, 100);
+            light.position.set(0, 0, 10);
+            vrScene.add(light);
+            
+            // VR scene animation
+            function animateVR() {
+                requestAnimationFrame(animateVR);
+                
+                mesh.rotation.x += 0.01;
+                mesh.rotation.y += 0.01;
+                
+                vrRenderer.render(vrScene, vrCamera);
+            }
+            
+            animateVR();
+        }
+        
+        // Вхід у WebXR
+        function enterWebXR() {
+            alert('WebXR session launch placeholder – implement if needed.');
+        }
+        
+        // Ефект затемнення
+        function initDimEffect() {
+            const dimOverlay = document.getElementById('dim-overlay');
+            const audioToggle = document.getElementById('audio-toggle');
+            
+            audioToggle.addEventListener('click', () => {
+                if (isAudioPlaying) {
+                    dimOverlay.classList.add('active');
+                } else {
+                    dimOverlay.classList.remove('active');
+                }
+            });
+        }
+        
+        // Ініціалізація при завантаженні сторінки
+        window.addEventListener('load', () => {
+            // Ініціалізація першої сцени
+            initScene('canvas-container', 'loading-1');
+            
+            // Ініціалізація другої сцени
+            setTimeout(() => {
+                initScene('canvas-container-2', 'loading-2');
+            }, 100);
+            
+            // Ініціалізація аудіо
+            initAudio();
+            
+            // Створення частинок
+            createParticles();
+            
+            // Ініціалізація VR
+            initVR();
+            
+            // Ініціалізація ефекту затемнення
+            initDimEffect();
+            
+            // Анімація появи елементів
+            const fadeElements = document.querySelectorAll('.fade-in');
+            fadeElements.forEach((el, i) => {
+                setTimeout(() => {
+                    el.style.animationDelay = `${i * 0.1}s`;
+                }, 100);
+            });
+        });
+    </script>
+</body>
+</html>
